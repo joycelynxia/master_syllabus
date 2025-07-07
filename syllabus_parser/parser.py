@@ -1,7 +1,7 @@
 import re
 import pdfplumber
 
-pdf_path = "syllabus_samples/example3.pdf"
+pdf_path = "syllabus_samples/example1.pdf"
 
 with pdfplumber.open(pdf_path) as pdf:
     full_text = ""
@@ -21,7 +21,11 @@ def extract_professor_info(text: str) -> dict:
         )
         if name_match:
             professor_info["name"] = name_match.group(1).strip()
-        
+            if '@' in line:
+                email_match = re.search(r'[\w\.-]+@[\w\.-]+', line)
+                professor_info["email"] = email_match.group()
+                return professor_info
+                
         email_match = re.search(r'[\w\.-]+@[\w\.-]+', line)
         if "Email:" in line:
             professor_info["email"] = email_match.group()
@@ -56,9 +60,14 @@ def extract_exams(text: str) -> list[dict]:
     return 
 
 
-print(extract_professor_info(full_text))
-print(extract_assignments(full_text))
+prof_info = (extract_professor_info(full_text))
+assignments = (extract_assignments(full_text))
 
-# def get_professor(text):
-#     for line in text:
+for key, val in prof_info.items():
+    print(key + ': ' + val)
+    
+for assignment in assignments:
+    title, due_date = assignment.values()
+    print(title)
+    print("\tdue date:", due_date)
         
